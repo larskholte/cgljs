@@ -1,0 +1,33 @@
+/* cgl.css */
+body, html {
+	margin: 0;
+	padding: 0;
+}
+.cgl_controls {
+	position:fixed;
+	bottom: 40px;
+	width: 100%;
+	text-align: center;
+}
+.cgl_controls .cgl_controls_container {
+	display: inline-block;
+}
+.cgl_controls .cgl_button {
+	position: static;
+	padding: 10px 10px 10px 10px;
+	/*border: 1px solid red;*/
+	background-color: #333333;
+	border: 1px solid black;
+	cursor: pointer;
+}
+.cgl_controls .cgl_button:active {
+	transform: translate(0px, 1px);
+}
+.cgl_controls .cgl_button:first-child {
+	border-top-left-radius: 10px;
+	border-bottom-left-radius: 10px;
+}
+.cgl_controls .cgl_button:last-child {
+	border-top-right-radius: 10px;
+	border-bottom-right-radius: 10px;
+}
