@@ -72,10 +72,31 @@ function cgl_game(ncols, nrows, data) {
 	this.data = data;
 	this.deaths = new cgl_bit_array(data.nbits);
 	this.births = new cgl_bit_array(data.nbits);
+	this.staged = new cgl_bit_array(data.nbits);
 }
 cgl_game.prototype.setCell = function(rowidx, colidx, set) {
 	if (set == undefined) set = 1;
 	this.data.set(rowidx * this.ncols + colidx, set);
+}
+cgl_game.prototype.stageCell = function(rowidx, colidx, stage) {
+	if (stage == undefined) stage = true;
+	this.staged.set(rowidx * this.ncols + colidx, stage);
+}
+cgl_game.prototype.hasStaged = function() {
+	for (var i = 0; i < this.staged.nints; i++) {
+		if (this.staged.data[i]) return true;
+	}
+	return false;
+}
+cgl_game.prototype.applyStage = function() {
+	this.data.orMask(this.staged);
+	this.staged.clear();
+}
+cgl_game.prototype.clear = function() {
+	this.data.clear();
+	this.deaths.clear();
+	this.births.clear();
+	this.staged.clear();
 }
 cgl_game.prototype.handleNeighborCount = function(bi, nc) {
 	if (nc < 2) { // Starvation
@@ -264,7 +285,10 @@ cgl_game.prototype.drawOnCanvas = function(canvas, options) {
 		for (var ci = 0; ci < visibleCols; ci++) {
 			var bi = ri * this.ncols + ci;
 			var fillStyle = '';
-			if (options.birthFillStyle && this.births.get(bi)) { // Draw newly born cells
+			if (this.staged.get(bi)) { // Draw staged cells
+				fillStyle = options.stagedFillStyle;
+			}
+			else if (options.birthFillStyle && this.births.get(bi)) { // Draw newly born cells
 				fillStyle = options.birthFillStyle;
 			}
 			else if (this.data.get(bi)) { // Draw live cells
@@ -289,13 +313,14 @@ cgl_game.prototype.drawOnCanvas = function(canvas, options) {
 
 var game;
 var cgl_options = {
-	cellSize : 40,
+	cellSize : 32,
 	cellBorderSize : 1,
 	cellFillStyle : "black",
 	emptyFillStyle : "#e5e5e5",
 	borderFillStyle : "white",
 	deathFillStyle : "",
 	birthFillStyle : "",
+	stagedFillStyle : "blue",
 	hiddenRows : 4,
 	hiddenCols : 4,
 	timestep : 500,
@@ -305,6 +330,7 @@ var cgl_tick;
 var cgl_ctrl_tick;
 var cgl_fade_delay = 1500;
 var cgl_mouse_in_controls = false;
+var cgl_mouse_down = 0;
 
 function cgl_resize_game() {
 	// Compute best number of visible rows and columns
@@ -333,7 +359,11 @@ function cgl_resize_canvas() {
 	game.drawOnCanvas(cgl_canvas, cgl_options);
 }
 function cgl_step_game() {
-	game.step();
+	if (game.hasStaged()) {
+		game.applyStage();
+	} else {
+		game.step();
+	}
 	game.drawOnCanvas(cgl_canvas, cgl_options);
 }
 
@@ -352,12 +382,37 @@ function cgl_main() {
 		control.addEventListener("mouseenter", cgl_mouse_enter_controls);
 		control.addEventListener("mouseleave", cgl_mouse_leave_controls);
 	}
+	window.addEventListener("mousedown", cgl_mousedown);
+	window.addEventListener("mouseup", cgl_mouseup);
+	document.body.oncontextmenu = function() { return false; };
 	// Start control fade timer
 	cgl_ctrl_tick = window.setTimeout(cgl_fade_controls, cgl_fade_delay);
 	// Start game ticking
 	cgl_tick = window.setInterval(cgl_step_game, cgl_options.timestep);
 }
-
+function cgl_stage_cell_at(x, y, stage) {
+	// Compute clicked cell
+	var col = Math.floor((x + cgl_options.cellSize / 2) / cgl_options.cellSize);
+	var row = Math.floor((y + cgl_options.cellSize / 2) / cgl_options.cellSize);
+	// Stage the clicked cell
+	game.stageCell(row, col, stage);
+}
+function cgl_mousedown(e) {
+	// Ignore mouse down in controls
+	if (cgl_mouse_in_controls) {
+		return false;
+	}
+	cgl_mouse_down = true;
+	// Pause the game
+	if (!cgl_options.paused) cgl_pause();
+	// Stage the clicked cell
+	cgl_stage_cell_at(e.x, e.y, e.button != 2);
+	game.drawOnCanvas(cgl_canvas, cgl_options);
+	return false;
+}
+function cgl_mouseup() {
+	cgl_mouse_down = false;
+}
 // Fades out the controls
 function cgl_fade_controls() {
 	if (cgl_mouse_in_controls) return; // Do not fade when mouse is in controls
@@ -370,6 +425,7 @@ function cgl_fade_controls() {
 	// Hide cursor
 	document.body.style.cursor = "none";
 }
+// Shows the controls
 function cgl_show_controls() {
 	// Show mouse
 	document.body.style.cursor = "";
@@ -388,7 +444,11 @@ function cgl_mouse_leave_controls() {
 	cgl_mouse_in_controls = false;
 }
 // Called when the user moves the mouse
-function cgl_mouse_move() {
+function cgl_mouse_move(e) {
+	if (cgl_mouse_down) { // Mouse is dragged over canvas
+		cgl_stage_cell_at(e.x, e.y);
+		game.drawOnCanvas(cgl_canvas, cgl_options);
+	}
 	// Show controls
 	cgl_show_controls();
 	// Reset fade timeout
@@ -409,8 +469,18 @@ function cgl_pause() {
 }
 // Called when the user clicks the reset button
 function cgl_reset() {
-	if (!cgl_options.paused) window.clearInterval(cgl_tick);
 	game = new cgl_game(game.ncols, game.nrows, "random");
 	cgl_step_game();
-	if (!cgl_options.paused) cgl_tick = window.setInterval(cgl_step_game, cgl_options.timestep);
+	if (!cgl_options.paused) {
+		window.clearInterval(cgl_tick);
+		cgl_tick = window.setInterval(cgl_step_game, cgl_options.timestep);
+	}
+}
+// Called when the user clicks the erase button
+function cgl_erase() {
+	game.clear();
+	game.drawOnCanvas(cgl_canvas, cgl_options);
+	if (!cgl_options.paused) {
+		cgl_pause();
+	}
 }
