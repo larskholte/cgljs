@@ -313,7 +313,7 @@ cgl_game.prototype.drawOnCanvas = function(canvas, options) {
 
 var game;
 var cgl_options = {
-	cellSize : 32,
+	cellSize : 28,
 	cellBorderSize : 1,
 	cellFillStyle : "black",
 	emptyFillStyle : "#e5e5e5",
@@ -328,7 +328,7 @@ var cgl_options = {
 };
 var cgl_tick;
 var cgl_ctrl_tick;
-var cgl_fade_delay = 1500;
+var cgl_fade_delay = 2000;
 var cgl_mouse_in_controls = false;
 var cgl_mouse_down = 0;
 
@@ -403,6 +403,8 @@ function cgl_mousedown(e) {
 		return false;
 	}
 	cgl_mouse_down = true;
+	// Show the controls
+	cgl_show_controls();
 	// Pause the game
 	if (!cgl_options.paused) cgl_pause();
 	// Stage the clicked cell
@@ -436,6 +438,9 @@ function cgl_show_controls() {
 		container.style.transitionDuration = "";
 		container.style.opacity = "100%";
 	}
+	// Reset fade timeout
+	window.clearTimeout(cgl_ctrl_tick);
+	cgl_ctrl_tick = window.setTimeout(cgl_fade_controls, cgl_fade_delay);
 }
 function cgl_mouse_enter_controls() {
 	cgl_mouse_in_controls = true;
@@ -451,9 +456,6 @@ function cgl_mouse_move(e) {
 	}
 	// Show controls
 	cgl_show_controls();
-	// Reset fade timeout
-	window.clearTimeout(cgl_ctrl_tick);
-	cgl_ctrl_tick = window.setTimeout(cgl_fade_controls, cgl_fade_delay);
 }
 // Called when the user clicks the pause button
 function cgl_pause() {

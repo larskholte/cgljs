@@ -2,6 +2,7 @@
 body, html {
 	margin: 0;
 	padding: 0;
+	overflow: hidden;
 }
 .cgl_controls {
 	position:fixed;
@@ -15,10 +16,10 @@ body, html {
 .cgl_controls .cgl_button {
 	position: static;
 	padding: 10px 10px 10px 10px;
-	/*border: 1px solid red;*/
 	background-color: #333333;
 	border: 1px solid black;
 	cursor: pointer;
+	border-radius: 0;
 }
 .cgl_controls .cgl_button:active {
 	transform: translate(0px, 1px);
