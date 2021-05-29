@@ -469,6 +469,14 @@ function cgl_pause() {
 		document.getElementById("cgl_pause").children[0].src = "img/pause.png"
 	}
 }
+// Called when the user adjusts the speed slider
+function cgl_set_speed() {
+	var val = document.getElementById("cgl_speed_slider").value;
+	cgl_options.timestep = 500 * Math.exp(((50 - val) * Math.log(5) / 50));
+	if (cgl_options.paused) return;
+	window.clearInterval(cgl_tick);
+	cgl_tick = window.setInterval(cgl_step_game, cgl_options.timestep);
+}
 // Called when the user clicks the reset button
 function cgl_reset() {
 	game = new cgl_game(game.ncols, game.nrows, "random");

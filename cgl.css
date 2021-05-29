@@ -16,10 +16,43 @@ body, html {
 .cgl_controls .cgl_button {
 	position: static;
 	padding: 10px 10px 10px 10px;
+	margin: 0;
 	background-color: #333333;
 	border: 1px solid black;
 	cursor: pointer;
 	border-radius: 0;
+}
+.cgl_controls .cgl_slider {
+	-webkit-appearance: none;
+	appearance: none;
+	background-color: #333333;
+	height: 50px;
+	padding: 0;
+	margin: 0;
+	border: none;
+}
+.cgl_slider::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	background: white;
+	width: 16px;
+	height: 16px;
+	border-radius: 8px;
+	cursor: pointer;
+}
+.cgl_slider::-moz-range-thumb {
+	background: white;
+	width: 16px;
+	height: 16px;
+	border-radius: 8px;
+	cursor: pointer;
+}
+.cgl_slider_container {
+	display: inline-block;
+	background-color: #333333;
+	position: static;
+	padding: 10px 10px 10px 10px;
+	border: 1px solid black;
 }
 .cgl_controls .cgl_button:active {
 	transform: translate(0px, 1px);
