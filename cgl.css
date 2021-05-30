@@ -25,12 +25,11 @@ body, html {
 .cgl_controls .cgl_slider {
 	-webkit-appearance: none;
 	appearance: none;
-	background-color: #777777;
-	height: 8px;
+	background-color: #333333;
+	height: 50px;
 	padding: 0;
-	margin: 21px 0px 21px 0px;
+	margin: 0;
 	border: none;
-	border-radius: 8px;
 }
 .cgl_slider::-webkit-slider-thumb {
 	-webkit-appearance: none;
