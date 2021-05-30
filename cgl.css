@@ -25,11 +25,14 @@ body, html {
 .cgl_controls .cgl_slider {
 	-webkit-appearance: none;
 	appearance: none;
-	background-color: #333333;
-	height: 50px;
+	position: relative;
+	bottom: 21px;
+	background-color: #777777;
+	height: 8px;
 	padding: 0;
 	margin: 0;
 	border: none;
+	border-radius: 4px;
 }
 .cgl_slider::-webkit-slider-thumb {
 	-webkit-appearance: none;
@@ -37,6 +40,7 @@ body, html {
 	background: white;
 	width: 16px;
 	height: 16px;
+	border: none;
 	border-radius: 8px;
 	cursor: pointer;
 }
@@ -44,6 +48,7 @@ body, html {
 	background: white;
 	width: 16px;
 	height: 16px;
+	border: none;
 	border-radius: 8px;
 	cursor: pointer;
 }
